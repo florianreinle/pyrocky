@@ -1,0 +1,15 @@
+.. py:class:: ModulePropertyIdentifier
+
+
+   Bases: :py:obj:`NamedTuple`
+
+   .. py:attribute:: name
+      :type: str
+
+      
+
+   .. py:attribute:: modules
+      :type: set[str]
+
+      
+
