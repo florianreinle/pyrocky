@@ -102,7 +102,7 @@ def launch_rocky(
     if rocky_exe is None or not rocky_exe.is_file():
         raise FileNotFoundError(f"Rocky executable is not found at {rocky_exe}.")
 
-    cmd = [rocky_exe, "--pyrocky", "--pyrocky-port", str(server_port)]
+    cmd = [str(rocky_exe), "--pyrocky", "--pyrocky-port", str(server_port)]
     if headless:
         cmd.append("--headless")
     with contextlib.suppress(subprocess.TimeoutExpired):
@@ -347,10 +347,10 @@ def _get_exec_using_tools_path(  # pragma: no cover
         for installation in sorted(ansys_installations, reverse=True):
             executable = (
                 Path(ansys_installations[installation])
-                / f"{product_name}/bin/{product_name}.exe"
+                / f"{product_name.lower()}/bin/{product_name}"
             )
             if executable.is_file() and installation >= MINIMUM_ANSYS_VERSION_SUPPORTED:
-                break
+                return executable
         else:
             raise FileNotFoundError(f"{product_name} executable is not found.")
     else:
@@ -359,6 +359,7 @@ def _get_exec_using_tools_path(  # pragma: no cover
         else:
             raise FileNotFoundError(f"{product_name} executable is not found.")
 
-        executable = Path(ansys_installation) / f"{product_name}/bin/{product_name}.exe"
-
+        executable = (
+            Path(ansys_installation) / f"{product_name.lower()}/bin/{product_name}"
+        )
     return executable
