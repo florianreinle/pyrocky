@@ -75,7 +75,7 @@ def launch_rocky(
         if close_existing:
             # Will try to connect to an existing session using the
             # given server port and attempt to close it.
-            client = connect(port=server_port)
+            client = connect(port=server_port, verify_connection=False)
             try:
                 client.close()
             except CommunicationError:

@@ -57,7 +57,11 @@ def connect_to_rocky(  # pragma: no cover
     return connect(host, port)
 
 
-def connect(host: str = "localhost", port: int = DEFAULT_SERVER_PORT) -> "RockyClient":
+def connect(
+    host: str = "localhost",
+    port: int = DEFAULT_SERVER_PORT,
+    verify_connection: bool = True
+    ) -> "RockyClient":
     """Connect to a Rocky/Freeflow app instance.
 
     Parameters
@@ -67,7 +71,8 @@ def connect(host: str = "localhost", port: int = DEFAULT_SERVER_PORT) -> "RockyC
     port : int, optional
         Service port to connect to. The default is ``DEFAULT_SERVER_PORT``,
         which is 50615.
-
+    verify_connection : bool, optional
+        Avoid connection check if set to False. The default is True.
     Returns
     -------
     RockyClient
@@ -77,18 +82,19 @@ def connect(host: str = "localhost", port: int = DEFAULT_SERVER_PORT) -> "RockyC
     register_proxies()
     _thread_local.rocky_api = Pyro5.api.Proxy(uri)
 
-    # Check if the connection succeeded
-    now = time.time()
-    while (time.time() - now) < _CONNECT_TO_SERVER_TIMEOUT:
-        try:
-            _thread_local.rocky_api._pyroBind()
-            assert _thread_local.rocky_api._pyroConnection is not None
-        except (CommunicationError, AssertionError):
-            time.sleep(1)
+    if verify_connection:
+        # Check if the connection succeeded
+        now = time.time()
+        while (time.time() - now) < _CONNECT_TO_SERVER_TIMEOUT:
+            try:
+                _thread_local.rocky_api._pyroBind()
+                assert _thread_local.rocky_api._pyroConnection is not None
+            except (CommunicationError, AssertionError):
+                time.sleep(1)
+            else:
+                break
         else:
-            break
-    else:
-        raise PyRockyError("Could not connect to the remote server: timed out")
+            raise PyRockyError("Could not connect to the remote server: timed out")
 
     rocky_client = RockyClient(_thread_local.rocky_api)
     return rocky_client
